@@ -1,0 +1,60 @@
+#!/bin/sh
+#Original script from http://dptnt.com/2009/08/add-date-time-stamp-to-jpeg-photos-using-free-software-mac-linux-nix-edition/
+#Thanks to the original author!
+
+if [ $# -eq 0 ]
+   then
+      cat << _EOF_
+
+USAGE: $0 file1 file2 ..., or
+       $0 *.jpg, or
+       $0 dir/*.jpg
+       ...
+
+_EOF_
+      exit
+fi
+
+while [ "$1" != "" ]; do
+        # Skip directories
+        if [ -d "$1" ]; then
+                shift
+                continue
+        fi
+        # Skip already converted files (may get overwritten)
+        if [[ $1 == *_DT* ]]
+        then
+                echo "------  Skipping: $1"
+                shift
+                continue
+        fi
+
+        # Work out a new file name by adding "_DT" before file extension
+        file=$1
+        echo "######  Working on file: $file"
+        filename=${file%.*}
+        extension=${file##*.}
+        output=${filename}_DT.${extension}
+
+        # Get the file dimension
+        dim=$(identify -format "%w %h" "$file")
+        width=${dim%% *}
+        height=${dim#* }
+
+        # Decide the font size automatically
+        if [ $width -ge $height ]
+        then
+                pointsize=$(($width/80))
+        else
+                pointsize=$(($height/80))
+        fi
+
+        echo "        Width: $width, Height: $height. Using pointsize: $pointsize"
+
+        # The real deal here
+        convert "$file" -gravity SouthEast -pointsize $pointsize -stroke black -strokewidth 4 -annotate +$pointsize+$pointsize "%[exif:DateTimeOriginal]" -stroke white -strokewidth 1 -fill white -annotate +$pointsize+$pointsize "%[exif:DateTimeOriginal]" "$output"
+
+        shift
+done
+
+exit 0
