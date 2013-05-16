@@ -41,7 +41,7 @@ QUALITY
   4k
   4096x2160
 
-Exemple:
+Example:
 $0 /PHOTOS/DIR/
 -> 20 fps, same size as source images
 
@@ -70,7 +70,7 @@ mkdir -p $DEST
 
 echo -en $TEXT_YELLOW"Building image list... "$TEXT_RAZ
 i=0
-find "$SOURCE" -regextype posix-extended -regex '.*('$SUPPORTED_EXT')$' | while read file
+find "$SOURCE" -regextype posix-extended -regex '.*('$SUPPORTED_EXT')$' | sort | while read file
 do
     NAME=$(printf "img_%05d.jpg" ${i})
     ln -s "$file" $DEST/$NAME
@@ -94,7 +94,7 @@ if [ $# -gt 2 ]; then
 fi
 echo -e $TEXT_RAZ
 echo "---------------- ffmpeg output ----------------"
-ffmpeg -f image2 -r $FPS -i 'img_%05d.jpg' -sameq $SCALE -r 30 -y $DEST_FILE
+ffmpeg -f image2 -r $FPS -i 'img_%05d.jpg' -q:v 1 $SCALE -r 30 -y $DEST_FILE
 echo "-----------------------------------------------"
 
 cd -
